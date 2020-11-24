@@ -1,0 +1,29 @@
+---
+title: "rsv_covid"
+author: "Dan Weinberger"
+date: "11/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages('curl')
+#library(curl)
+#if (!require("devtools")) install.packages("devtools")
+#devtools::install_github("PMassicotte/gtrendsR", force=TRUE)
+library(RApiDatetime)
+library(gtrendsR)
+library(pbapply)
+```
+
+```{r, eval=F}
+
+state.abb.us <- paste0('US-', state.abb)
+
+state.trends <- pblapply(state.abb.us, function(x)  gtrends(c("flu",'pneumonia','fever','rsv', 'bronchiolitis'), geo = c(x), category = 0, gprop='web')
+       )
+saveRDS(state.trends, 'all.state.data.rds')
+```
+
+
+
