@@ -14,21 +14,48 @@ knitr::opts_chunk$set(echo = TRUE)
 library(RApiDatetime)
 library(gtrendsR)
 library(pbapply)
+library(reshape2)
 ```
 
 ```{r, eval=F}
 
 state.abb.us <- paste0('US-', state.abb)
+searches <- c("flu",'pneumonia','fever','rsv', 'bronchiolitis')
 
-state.trends <- pblapply(state.abb.us, function(x)  gtrends(c("flu",'pneumonia','fever','rsv', 'bronchiolitis'), geo = c(x), category = 0, gprop='web')
-       )
+
+state.trends <- pblapply(state.abb.us, function(x) {
+    lapply(searches, function(y){
+        gtrends(keyword=y, geo = c(x), category = 0, gprop='web')
+    })
+  }
+)
+
+
 saveRDS(state.trends, 'all.state.data.rds')
 ```
 
 ```{r}
 l1 <- readRDS('all.state.data.rds')
-l2 <- lapply(l1,'[[','interest_over_time')
+l2 <- lapply(l1,function(x) lapply(x, '[[','interest_over_time'))
+l3 <- lapply(l2, function(x) do.call( 'rbind.data.frame', x))
 
+d1 <- do.call( 'rbind.data.frame', l3)
+
+d1.m <- melt(d1[,c('date','hits','geo', 'keyword')], id.vars=c('geo','date','keyword'))
+
+d1.m$value <- as.numeric(d1.m$value)
+#hist(d1.m$value[d1.m$geo=='US-FL'])
+d1.c <- acast(d1.m ,date~geo~keyword)
+```
+
+```{r}
+plot(d1.c[,'US-FL','rsv'], type='l')
+```
+
+
+```{r}
+state.trends.rsv <- gtrends(c('rsv'), geo = c('US-GA'), category = 0, gprop='web')
+       
 ```
 
 
