@@ -25,5 +25,12 @@ state.trends <- pblapply(state.abb.us, function(x)  gtrends(c("flu",'pneumonia',
 saveRDS(state.trends, 'all.state.data.rds')
 ```
 
+```{r}
+l1 <- readRDS('all.state.data.rds')
+l2 <- lapply(l1,'[[','interest_over_time')
+
+```
+
+
 
 
