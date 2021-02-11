@@ -61,7 +61,7 @@ d1.m.alt$epiyr[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRyear[d1.m.alt$MMWRweek<=26
 d1.m.alt$epiwk <- d1.m.alt$MMWRweek
 d1.m.alt$epiwk[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=26] + 52
 
-d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo~keyword)
+d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo~keyword, fun.aggregate = sum)
 
 ```
 
