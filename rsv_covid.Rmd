@@ -87,16 +87,30 @@ d1.m.alt$epiwk[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=26
 d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo~keyword, fun.aggregate = sum)
 
 last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
-d1.c.alt['2020',dimnames(d1.c.alt)[[2]]>last.wk,,] <- NA
+d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 ```
 
 ```{r, fig.width=8, fig.height=6}
-cols <- c(rep('gray',5),'red')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'red')
+linetypes=c(rep(1,5),2)
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(5,5), mar=c(2,2,1,0))
 lapply(states, function(x){
-  matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=1)
+  matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=linetypes)
+abline(v=36, lty=2, col='gray')
+})
 
+```
+
+```{r, fig.width=8, fig.height=6}
+select.states <-c('US-FL','US-GA','US-NY','US-CA','US-WA','US-MD','US-TX','US-IL','US-WI')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'red')
+linetypes=c(rep(1,5),2)
+states <- dimnames(d1.c.alt)[[3]]
+par(mfrow=c(3,3), mar=c(2,2,1,0))
+lapply(select.states, function(x){
+  matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=linetypes)
+abline(v=36, lty=2, col='gray')
 })
 
 ```
@@ -140,15 +154,15 @@ d1.m.alt$epiwk[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=26
 d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo, fun.aggregate = sum)
 
 last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
-d1.c.alt['2020',dimnames(d1.c.alt)[[2]]>last.wk,] <- NA
+d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,] <- NA
 
 countries <- c('FR','FR-J')
 
-cols <- c(rep('gray',5),'red')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'red')
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(1,1), mar=c(2,2,1,0))
 lapply(countries, function(x){
-  matplot(t(d1.c.alt[,,x]), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=1)
+  matplot(t(d1.c.alt[,,x]), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=linetypes)
 
 })
 ```
@@ -175,15 +189,17 @@ d1.m.alt <- cbind.data.frame(d1.m.alt,dates2[,c('MMWRyear', 'MMWRweek')])
 d1.c.alt <- acast(d1.m.alt ,MMWRyear~MMWRweek~geo, fun.aggregate = sum)
 
 last.wk <- max(d1.m.alt$MMWRweek[d1.m.alt$MMWRyear==2021] )
-d1.c.alt['2021',dimnames(d1.c.alt)[[2]]>last.wk,] <- NA
+d1.c.alt['2021',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,] <- NA
 
 countries <- c( 'AR','BR','ZA')
 
 cols <- c(rep('gray',4),'red','red')
+linestypes <- c(rep(1,5),2)
+
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(1,1), mar=c(2,2,1,0))
 lapply(countries, function(x){
-  matplot(t(d1.c.alt[,,x]), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=1)
+  matplot(t(d1.c.alt[,,x]), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=x, lty=linestypes)
 
 })
 
