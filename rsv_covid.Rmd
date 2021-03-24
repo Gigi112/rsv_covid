@@ -128,6 +128,7 @@ lapply(states, function(x){
 
 ```
 ## Other Countries 
+
 ```{r}
 l1b <- readRDS( 'country.data.rds')
 
