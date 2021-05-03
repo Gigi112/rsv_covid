@@ -38,9 +38,7 @@ state.trends <- pblapply(state.abb.us, function(x) {
 
 
 saveRDS(state.trends, 'all.state.data.rds')
-```
 
-```{r, eval=F}
 #Other geographies
 #
 #data("countries")
@@ -59,6 +57,8 @@ country.trends <- lapply(test.grps, function(x) gtrends(keyword=x[1], geo = x[2]
 saveRDS(country.trends, 'country.data.rds')
 
 ```
+
+
 
 
 ## US States
@@ -97,7 +97,7 @@ d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 
 
 ```{r, fig.width=8, fig.height=6 ,results=FALSE, message=FALSE, warning=FALSE}
-cols <- c(rep('gray',4),rgb(1,0,0,0.3),'red')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue')
 linetypes=c(rep(1,5),2)
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(5,5), mar=c(2,2,1,0))
@@ -112,7 +112,7 @@ abline(v=36, lty=2, col='gray')
 
 ```{r, fig.width=8, fig.height=6, results=FALSE, message=FALSE, warning=FALSE}
 select.states <-c('US-FL','US-GA','US-NY','US-CA','US-WA','US-MD','US-TX','US-IL','US-WI')
-cols <- c(rep('gray',4),rgb(1,0,0,0.3),'red')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue')
 linetypes=c(rep(1,5),2)
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(3,3), mar=c(2,2,1,0))
@@ -129,7 +129,7 @@ abline(v=36, lty=2, col='gray')
 If we look at searches for 'bronchiolitis', the picture is a bit more mixed, with several states showing recent increases.
 
 ```{r, fig.width=8, fig.height=6 ,results=FALSE, message=FALSE, warning=FALSE}
-cols <- c(rep('gray',5),'red')
+cols <- c(rep('gray',5),'blue')
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(5,5), mar=c(2,2,1,0))
 
@@ -172,7 +172,7 @@ d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,] <- NA
 
 countries <- c('FR','FR-J')
 
-cols <- c(rep('gray',4),rgb(1,0,0,0.3),'red')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue')
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(1,1), mar=c(2,2,1,0))
 lapply(countries, function(x){
@@ -208,7 +208,7 @@ d1.c.alt['2021',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,] <- NA
 
 countries <- c( 'AR','BR','ZA')
 
-cols <- c(rep('gray',4),'red','red')
+cols <- c(rep('gray',4),'red','blue')
 linestypes <- c(rep(1,5),2)
 
 states <- dimnames(d1.c.alt)[[3]]
