@@ -97,13 +97,15 @@ last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
 d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 ```
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=8, fig.height=6,results=FALSE, message=FALSE, warning=FALSE}
 
 df1 <- dcast(d1.m.alt[d1.m.alt$keyword=='rsv',] ,epiyr+epiwk+geo~., fun.aggregate = sum)
 names(df1) <- c('epiyr','epiwk','state','cases')
 
 cols <- c(rep('gray',4),rgb(1,0,0,1),'blue')
 ltypes <- c(rep(1,4),2,1)
+
+my_us_grid <- us_state_grid1[c(-2, -11,-51), ]
 
 df1$epiyr <- as.factor(df1$epiyr)
 p1 <- ggplot(df1, aes(
@@ -134,7 +136,7 @@ p1 <- ggplot(df1, aes(
     plot.title = element_text(size = 24),
     strip.background = element_rect(color = "white")
   ) +
-  facet_geo( ~ state, grid = "us_state_grid1")
+  facet_geo( ~ state, grid = my_us_grid)
 p1
 ```
 
