@@ -108,6 +108,7 @@ ltypes <- c(rep(1,4),2,1)
 my_us_grid <- us_state_grid1[c(-2, -11,-51), ]
 
 df1$epiyr <- as.factor(df1$epiyr)
+theme_set(theme_minimal())
 p1 <- ggplot(df1, aes(
   x = epiwk,
   y = cases,
