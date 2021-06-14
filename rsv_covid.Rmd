@@ -17,6 +17,8 @@ library(gtrendsR)
 library(pbapply)
 library(reshape2)
 library(MMWRweek)
+library(ggplot2)
+library(geofacet)
 ```
 
 In these plots, we pulled searches for 'RSV' from Google trends using the gtrendsR package. Previous work found that Google searches for 'RSV' capture spatiotemporal variations in RSV activity across the US: https://www.biorxiv.org/content/10.1101/607119v1
@@ -64,8 +66,7 @@ saveRDS(country.trends, 'country.data.rds')
 ## US States
 
 Searches for "RSV"
-
-```{r,results=FALSE, message=FALSE, warning=FALSE}
+```{r, results=FALSE, message=FALSE, warning=FALSE}
 l1a <- readRDS('all.state.data.rds')
 #l1 <- c(l1a, l1b)
 l2 <- lapply(l1a,function(x) lapply(x, '[[','interest_over_time'))
@@ -88,6 +89,7 @@ d1.m.alt$epiyr <- d1.m.alt$MMWRyear
 d1.m.alt$epiyr[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRyear[d1.m.alt$MMWRweek<=26] - 1
 d1.m.alt$epiwk <- d1.m.alt$MMWRweek
 d1.m.alt$epiwk[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=26] + 52
+d1.m.alt$geo <- substr(d1.m.alt$geo,4,5)
 
 d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo~keyword, fun.aggregate = sum)
 
@@ -95,8 +97,50 @@ last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
 d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 ```
 
+```{r, fig.width=8, fig.height=6}
 
-```{r, fig.width=8, fig.height=6 ,results=FALSE, message=FALSE, warning=FALSE}
+df1 <- dcast(d1.m.alt ,epiyr+epiwk+geo~., fun.aggregate = sum)
+names(df1) <- c('epiyr','epiwk','state','cases')
+
+cols <- c(rep('gray',4),rgb(1,0,0,1),'blue')
+ltypes <- c(rep(1,4),2,1)
+
+df1$epiyr <- as.factor(df1$epiyr)
+p1 <- ggplot(df1, aes(
+  x = epiwk,
+  y = cases,
+  group = epiyr,
+  colour = epiyr
+)) +
+  geom_line(aes(lty = epiyr)) +
+  scale_color_manual(values = cols) +
+  scale_linetype_manual(values = ltypes) +
+  labs(title = "Re-emergence of RSV in the US (Google trends)",
+       x = element_blank(),
+       y = element_blank()) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.position = "none",
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank(),
+    plot.title = element_text(size = 24),
+    strip.background = element_rect(color = "white")
+  ) +
+  facet_geo( ~ state, grid = "us_state_grid1")
+p1
+```
+
+
+
+```{r, eval=F,fig.width=8, fig.height=6 ,results=FALSE, message=FALSE, warning=FALSE}
 cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue')
 linetypes=c(rep(1,5),2)
 states <- dimnames(d1.c.alt)[[3]]
@@ -111,7 +155,11 @@ abline(v=36, lty=2, col='gray')
 ## Selected states
 
 ```{r, fig.width=8, fig.height=6, results=FALSE, message=FALSE, warning=FALSE}
-select.states <-c('US-FL','US-GA','US-NY','US-CA','US-WA','US-MD','US-TX','US-IL','US-WI')
+cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue')
+linetypes=c(rep(1,5),2)
+states <- dimnames(d1.c.alt)[[3]]
+
+select.states <-c('FL','GA','NY','CA','WA','MD','TX','IL','WI')
 cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue')
 linetypes=c(rep(1,5),2)
 states <- dimnames(d1.c.alt)[[3]]
@@ -122,6 +170,8 @@ abline(v=36, lty=2, col='gray')
 })
 
 ```
+
+
 
 
 #Bronchiolitis in US
