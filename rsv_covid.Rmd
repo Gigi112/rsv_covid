@@ -99,7 +99,7 @@ d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 
 ```{r, fig.width=8, fig.height=6}
 
-df1 <- dcast(d1.m.alt ,epiyr+epiwk+geo~., fun.aggregate = sum)
+df1 <- dcast(d1.m.alt[d1.m.alt$keyword=='rsv',] ,epiyr+epiwk+geo~., fun.aggregate = sum)
 names(df1) <- c('epiyr','epiwk','state','cases')
 
 cols <- c(rep('gray',4),rgb(1,0,0,1),'blue')
