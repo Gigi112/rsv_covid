@@ -19,6 +19,7 @@ library(reshape2)
 library(MMWRweek)
 library(ggplot2)
 library(geofacet)
+library(plotrix)
 ```
 
 In these plots, we pulled searches for 'RSV' from Google trends using the gtrendsR package. Previous work found that Google searches for 'RSV' capture spatiotemporal variations in RSV activity across the US: https://www.biorxiv.org/content/10.1101/607119v1
@@ -176,10 +177,54 @@ abline(v=36, lty=2, col='gray')
 
 ```
 
+## Polar plots of states
+
+This plots the time series on a circular axis, showing the shift in timing compared to normal. Blue shows the periods since July 2020
+
+```{r, fig.width=8, fig.height=6,results=FALSE, message=FALSE, warning=FALSE}
+df1$epiyr <- as.factor(df1$epiyr)
+
+cols <- c(rep('gray',4),'blue','blue')
+linetypes=c(rep(1,5),1,1)
+
+theme_set(theme_minimal())
+p1 <- ggplot(df1, aes(
+  x = epiwk,
+  y = cases,
+  group = epiyr,
+  colour = epiyr
+)) +
+  geom_line(aes(lty = epiyr)) +
+  coord_polar() +
+  scale_color_manual(values = cols) +
+  scale_linetype_manual(values = ltypes) +
+  labs(title = "Searches for 'RSV' in the US (Google trends)",
+       x = element_blank(),
+       y = element_blank()) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.position = "none",
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank(),
+    plot.title = element_text(size = 24),
+    strip.background = element_rect(color = "white")
+  ) +
+  facet_geo( ~ state, grid = my_us_grid)
+p1
+
+```
 
 
 
-#Bronchiolitis in US
+## Bronchiolitis in US
 
 If we look at searches for 'bronchiolitis', the picture is a bit more mixed, with several states showing recent increases.
 
