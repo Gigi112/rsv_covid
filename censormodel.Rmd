@@ -1,0 +1,85 @@
+---
+title: "timing_comp"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rjags)
+```
+
+### right censor sensitivity analysis
+```{r}
+censormodel <- "model{
+for(i in 1:n){
+is.censor[i] ~ dinterval(Z[i],t.cen[i])
+ Z[i] ~ dexp(lambda[i]) 
+ lambda[i] = exp((beta0+x1[i]*b0)+(beta1+x1[i]*b1)*log(W[i])+sigma[i])
+ sigma[i] ~ dnorm(0,0.001)
+}
+beta0~dnorm(0,0.001)
+beta1~dnorm(0,0.001)
+b0~dnorm(0,0.001)
+b1~dnorm(0,0.001)
+
+}
+"
+
+```
+
+### right censor sensitivity analysis
+```{r}
+censormodel <- "model{
+for(i in 1:n){
+is.censor[i] ~ dinterval(Z[i],t.cen[i])
+ Z[i] ~ dweib(alpha,lambda[i])
+ lambda[i] = exp((beta0+x1[i]*b01+x2[i]*b02)+(beta1+x1[i]*b11+x2[i]*b12)*log(W[i])+sigma[i])
+ sigma[i] ~ dnorm(0,0.001)
+}
+alpha~dgamma(1.1,1.1)
+beta0~dnorm(0,0.001)
+beta1~dnorm(0,0.001)
+b01~dnorm(0,0.001)
+b02~dnorm(0,0.001)
+b11~dnorm(0,0.001)
+b12~dnorm(0,0.001)
+
+}
+"
+
+```
+
+```{r}
+popden <- read.csv("D:/re-emergent RSV timing/population-density-2021.csv",header = T)
+Z <- onset.2020.FL+0.01
+t.cen <- max(onset.2020$onset)-onset.2020$onset[onset.2020$state=='FL']
+n <- length(Z)
+t.cen <- rep(t.cen,n)
+
+x1 <- as.numeric(popden$Population.Density.2020.Census)
+x1[30] <- 1263
+x1[39] <- 1061.4
+x2 <- as.numeric(popden$familysize)
+is.censor <- ifelse(is.na(Z),1,0)
+
+data <- list(n=n,Z=Z,t.cen=t.cen,is.censor=is.censor,W=onset.whole.FL+0.01,x1=log(x1),x2=x2)
+tinits1 <- 1+onset.2020$onset
+is.na(tinits1) <- complete.cases(onset.2020$grey)
+tinits2 <- tinits1+1
+censorinit <- list(list(Z=tinits1),list(Z=tinits2))
+```
+
+```{r}
+censor <- jags.model(textConnection(censormodel),data=data,inits = censorinit,n.chains = 2)
+
+update(censor,100000)
+
+censorsample <- coda.samples(censor,c("beta0","beta1","b01","b02","b11","b12"),500000,thin=10)
+```
+```{r}
+#par(ask=T)
+traceplot(censorsample)
+summary(censorsample)
+densplot(censorsample)
+```
+
