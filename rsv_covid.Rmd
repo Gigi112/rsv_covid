@@ -1,7 +1,7 @@
 ---
 title: "Re-emergence of RSV in the United States"
 author: "Dan Weinberger"
-date: "7/7/2021"
+date: "7/16/2021"
 output: html_document
 ---
 
@@ -166,7 +166,7 @@ linetypes=c(rep(1,5),2,2)
 states <- dimnames(d1.c.alt)[[3]]
 
 select.states <-c('FL','GA','NY','CA','WA','MD','TX','IL','WI')
-cols <- c(rep('gray',3),rgb(1,0,0,0.3),'blue')
+cols <- c(rep('gray',3),rgb(1,0,0,0.3),'blue','blue')
 linetypes=c(rep(1,5),2)
 states <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(3,3), mar=c(2,2,1,0))
