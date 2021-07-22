@@ -100,6 +100,29 @@ d1.c.alt['2021',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 
 ```
 
+
+```{r, eval=F}
+#Metro region
+#https://stackoverflow.com/questions/61213647/what-do-gtrendsr-statistical-areas-correlate-with
+data("countries")
+
+metro.codes <- unique(countries$sub_code[substr(countries$sub_code, 1,2) == "US"])
+metro.codes <- metro.codes[!is.na(metro.codes)]
+metro.codes <- metro.codes[71:length(metro.codes)]
+
+
+metro.trends <- pblapply(metro.codes, function(x) {
+    lapply(searches, function(y){
+        gtrends(keyword='rsv', geo = c(x), category = 0, gprop='web',onlyInterest = T)
+    })
+  }
+)
+
+  test <- gtrends(keyword='rsv', geo = c('US-CT-YANTIC'), category = 0, gprop='web',low_search_volume=T,onlyInterest = T)
+
+
+```
+
 ```{r, fig.width=8, fig.height=6,results=FALSE, message=FALSE, warning=FALSE}
 
 df1 <- dcast(d1.m.alt[d1.m.alt$keyword=='rsv',] ,epiyr+epiwk+geo~., fun.aggregate = sum)
