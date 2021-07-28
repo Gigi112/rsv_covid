@@ -112,23 +112,48 @@ d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 ```{r, eval=F}
 #Metro region
 #https://stackoverflow.com/questions/61213647/what-do-gtrendsr-statistical-areas-correlate-with
+#Nielsen DMA map: http://bl.ocks.org/simzou/6459889
 data("countries")
 
-metros <- countries[countries$country_code=='US',]
-metros <- metros[grep("[[:digit:]]", substring(metros$sub_code, first=4)),]
+metros <- countries[countries$country_code == 'US', ]
+metros <-
+  metros[grep("[[:digit:]]", substring(metros$sub_code, first = 4)), ]
+metros$numeric.sub.area <- gsub('US-', '', metros$sub_code)
 
-metro.codes <- unique(metros$sub_code)
+name.spl <- stringr::str_split(metros$name, ' ')
+
+find.state.loc <-
+  lapply(name.spl,  function(x)
+    which(x %in% state.abb)) #position of state in string
+
+state.metros <-
+  mapply(function(x, y) {
+    y[x]
+  } , x = find.state.loc, y = name.spl)
+
+n.states <- lapply(state.metros, length)
 
 
-metro.trends <- pblapply(metro.codes, function(x) {
+#This provides a full list of US-STATE-METRO codes; including when a metro crosses 2 states. Note that not all of these codes are valid
+all.metro.combos <- mapply(function(state, metro) {
+  paste('US', state, metro, sep = '-')
+},
+state.metros,
+metros$numeric.sub.area, SIMPLIFY = F)
+
+
+all.metro.combos <- unlist(all.metro.combos[n.states > 0])
+all.metro.combos <- all.metro.combos[!is.na(all.metro.combos)]
+
+searches <- c('rsv')
+
+metro.trends <- pblapply(all.metro.combos, function(x) {
     lapply(searches, function(y){
-        gtrends(keyword='rsv', geo = c(x), category = 0, gprop='web',onlyInterest = T)
+        tryCatch(gtrends(keyword=y, geo = c(x), category = 0, gprop='web',onlyInterest=T), error=function(e) NULL)
     })
   }
 )
-
-
- 
+saveRDS(metro.trends, 'metro.data.rds')
  
 
 ```
