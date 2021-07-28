@@ -1,7 +1,7 @@
 ---
 title: "Re-emergence of RSV in the United States"
 author: "Dan Weinberger"
-date: "7/16/2021"
+date: "7/28/2021"
 output: html_document
 ---
 
@@ -11,7 +11,10 @@ knitr::opts_chunk$set(echo = F)
 #install.packages('curl')
 #library(curl)
 #if (!require("devtools")) install.packages("devtools")
-#devtools::install_github("PMassicotte/gtrendsR", force=TRUE)
+
+#Install dev version!
+#devtools::install_github("PMassicotte/gtrendsR")
+
 library(RApiDatetime)
 library(gtrendsR)
 library(pbapply)
@@ -51,7 +54,8 @@ test.grps <- list( c( 'RSV','ZA' ),
                   c('bronquiolite','BR'),
                   c('bronchiolite','FR'),
 
-                  c('bronchiolite','FR-J')
+                  c('bronchiolite','FR-J'),
+                  c('RSV','GB')
       )
 names(test.grps) <- c('S. Africa','Argentina', 'Brazil','France', 'France-Paris region')
 
@@ -84,18 +88,22 @@ d1.c <- acast(d1.m ,date~geo~keyword)
 
 #Case by weekN and year
 d1.m.alt <- d1.m
+
 dates2 <- MMWRweek(as.Date(d1.m$date))
 d1.m.alt <- cbind.data.frame(d1.m.alt,dates2[,c('MMWRyear', 'MMWRweek')])
+max.wk.yr <-  max(d1.m.alt$MMWRweek[d1.m.alt$MMWRyear==2021] )
+
 d1.m.alt$epiyr <- d1.m.alt$MMWRyear
-d1.m.alt$epiyr[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRyear[d1.m.alt$MMWRweek<=26] - 1
+d1.m.alt$epiyr[d1.m.alt$MMWRweek<=max.wk.yr] <- d1.m.alt$MMWRyear[d1.m.alt$MMWRweek<=max.wk.yr] - 1
 d1.m.alt$epiwk <- d1.m.alt$MMWRweek
-d1.m.alt$epiwk[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=26] + 52
+d1.m.alt$epiwk[d1.m.alt$MMWRweek<=max.wk.yr] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=max.wk.yr] + 52
 d1.m.alt$geo <- substr(d1.m.alt$geo,4,5)
 
 d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo~keyword, fun.aggregate = sum)
 
-last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2021] )
-d1.c.alt['2021',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
+
+last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
+d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 
 
 ```
@@ -106,9 +114,10 @@ d1.c.alt['2021',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 #https://stackoverflow.com/questions/61213647/what-do-gtrendsr-statistical-areas-correlate-with
 data("countries")
 
-metro.codes <- unique(countries$sub_code[substr(countries$sub_code, 1,2) == "US"])
-metro.codes <- metro.codes[!is.na(metro.codes)]
-metro.codes <- metro.codes[71:length(metro.codes)]
+metros <- countries[countries$country_code=='US',]
+metros <- metros[grep("[[:digit:]]", substring(metros$sub_code, first=4)),]
+
+metro.codes <- unique(metros$sub_code)
 
 
 metro.trends <- pblapply(metro.codes, function(x) {
@@ -118,8 +127,9 @@ metro.trends <- pblapply(metro.codes, function(x) {
   }
 )
 
-  test <- gtrends(keyword='rsv', geo = c('US-CT-YANTIC'), category = 0, gprop='web',low_search_volume=T,onlyInterest = T)
 
+ 
+ 
 
 ```
 
@@ -313,19 +323,24 @@ d1.c <- acast(d1.m ,date~geo)
 
 #Case by weekN and year
 d1.m.alt <- d1.m
+
 dates2 <- MMWRweek(as.Date(d1.m$date))
 d1.m.alt <- cbind.data.frame(d1.m.alt,dates2[,c('MMWRyear', 'MMWRweek')])
+max.wk.yr <-  max(d1.m.alt$MMWRweek[d1.m.alt$MMWRyear==2021] )
+
 d1.m.alt$epiyr <- d1.m.alt$MMWRyear
-d1.m.alt$epiyr[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRyear[d1.m.alt$MMWRweek<=26] - 1
+d1.m.alt$epiyr[d1.m.alt$MMWRweek<=max.wk.yr] <- d1.m.alt$MMWRyear[d1.m.alt$MMWRweek<=max.wk.yr] - 1
 d1.m.alt$epiwk <- d1.m.alt$MMWRweek
-d1.m.alt$epiwk[d1.m.alt$MMWRweek<=26] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=26] + 52
+d1.m.alt$epiwk[d1.m.alt$MMWRweek<=max.wk.yr] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=max.wk.yr] + 52
+#d1.m.alt$geo <- substr(d1.m.alt$geo,4,5)
 
 d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo, fun.aggregate = sum)
 
-last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2021] )
-d1.c.alt['2021',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,] <- NA
 
-countries <- c('FR','FR-J')
+last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
+d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,] <- NA
+
+countries <- c('GB','FR','FR-J')
 
 cols <- c(rep('gray',3),rgb(1,0,0,0.3),'blue','blue')
 states <- dimnames(d1.c.alt)[[3]]
