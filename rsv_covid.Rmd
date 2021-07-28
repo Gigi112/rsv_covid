@@ -470,13 +470,37 @@ d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue','blue')
 linetypes=c(rep(1,5),2,2)
 select.counties <- grep('US-FL', dimnames(d1.c.alt)[[3]] )
+
+select.counties2 <- c(grep('US-MA', dimnames(d1.c.alt)[[3]] ),
+grep('US-CT', dimnames(d1.c.alt)[[3]] ),
+grep('US-NH', dimnames(d1.c.alt)[[3]] ),
+grep('US-RI', dimnames(d1.c.alt)[[3]] ),
+grep('US-VT', dimnames(d1.c.alt)[[3]] ))
+
 county.labs <- substring( dimnames(d1.c.alt)[[3]], first=11)
 
 cols <- c(rep('gray',3),rgb(1,0,0,0.3),'blue','blue')
 linetypes=c(rep(1,5),2)
 counties <- dimnames(d1.c.alt)[[3]]
+```
+
+Florida
+
+```{r, fig.width=10, fig.height=10, results=FALSE, message=FALSE, warning=FALSE}
 par(mfrow=c(3,3), mar=c(2,2,1,0))
 lapply(select.counties, function(x){
+  matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=county.labs[x], lty=linetypes)
+abline(v=36, lty=2, col='gray')
+})
+```
+
+New England
+
+```{r, fig.width=10, fig.height=10, results=FALSE, message=FALSE, warning=FALSE}
+
+par(mfrow=c(2,2), mar=c(2,2,1,0))
+
+lapply(select.counties2, function(x){
   matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=county.labs[x], lty=linetypes)
 abline(v=36, lty=2, col='gray')
 })
