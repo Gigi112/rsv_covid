@@ -155,10 +155,10 @@ metro.trends <- pblapply(all.metro.combos, function(x) {
     })
   }
 )
+names(metro.trends) <- metros$name[n.states > 0]
+
 saveRDS(metro.trends, 'metro.data.rds')
  
-
-str(metro.trends[[1]])
 
 ```
 
@@ -422,19 +422,26 @@ lapply(countries, function(x){
 
 ## US Counties
 
-```{r, eval=F}
+```{r}
 l1a <- readRDS('metro.data.rds')
 #l1 <- c(l1a, l1b)
 l2 <- lapply(l1a,function(x) lapply(x, '[[','interest_over_time'))
 l3 <- lapply(l2, function(x) do.call( 'rbind.data.frame', x))
 
+for(i in 1:length(l3)){
+  if(nrow(l3[[i]])>0 ){
+   l3[[i]]$city_name= names(l1a)[i]
+  }
+}
+
+
 d1 <- do.call( 'rbind.data.frame', l3)
 
-d1.m <- melt(d1[,c('date','hits','geo', 'keyword')], id.vars=c('geo','date','keyword'))
+d1.m <- melt(d1[,c('date','hits','city_name', 'keyword','geo')], id.vars=c('geo','city_name','date','keyword'))
 
 d1.m$value <- as.numeric(d1.m$value)
 #hist(d1.m$value[d1.m$geo=='US-FL'])
-d1.c <- acast(d1.m ,date~geo~keyword)
+d1.c <- acast(d1.m ,date~geo+city_name~keyword)
 
 
 #Case by weekN and year
@@ -450,7 +457,7 @@ d1.m.alt$epiwk <- d1.m.alt$MMWRweek
 d1.m.alt$epiwk[d1.m.alt$MMWRweek<=max.wk.yr] <- d1.m.alt$MMWRweek[d1.m.alt$MMWRweek<=max.wk.yr] + 52
 #d1.m.alt$geo <- substr(d1.m.alt$geo,4,5)
 
-d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo~keyword, fun.aggregate = sum)
+d1.c.alt <- acast(d1.m.alt ,epiyr~epiwk~geo+city_name~keyword, fun.aggregate = sum)
 
 
 last.wk <- max(d1.m.alt$epiwk[d1.m.alt$epiyr==2020] )
@@ -459,17 +466,18 @@ d1.c.alt['2020',as.numeric(dimnames(d1.c.alt)[[2]])>last.wk,,] <- NA
 
 ## Selected counties
 
-```{r, fig.width=8, fig.height=6, results=FALSE, message=FALSE, warning=FALSE}
+```{r, fig.width=10, fig.height=10, results=FALSE, message=FALSE, warning=FALSE}
 cols <- c(rep('gray',4),rgb(1,0,0,0.3),'blue','blue')
 linetypes=c(rep(1,5),2,2)
-select.counties <- grep('FL', dimnames(d1.c.alt)[[3]] )
+select.counties <- grep('US-FL', dimnames(d1.c.alt)[[3]] )
+county.labs <- substring( dimnames(d1.c.alt)[[3]], first=11)
 
 cols <- c(rep('gray',3),rgb(1,0,0,0.3),'blue','blue')
 linetypes=c(rep(1,5),2)
 counties <- dimnames(d1.c.alt)[[3]]
 par(mfrow=c(3,3), mar=c(2,2,1,0))
 lapply(select.counties, function(x){
-  matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=dimnames(d1.c.alt)[[3]][x], lty=linetypes)
+  matplot(t(d1.c.alt[,,x,'rsv']), type='l', col=cols, bty='l', xlab='', ylab='', xlim=c(1,52), main=county.labs[x], lty=linetypes)
 abline(v=36, lty=2, col='gray')
 })
 
